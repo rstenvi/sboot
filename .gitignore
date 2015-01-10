@@ -1,29 +1,15 @@
-# Object files
+
+
 *.o
-*.ko
-*.obj
-*.elf
 
-# Precompiled Headers
-*.gch
-*.pch
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+bochsout.txt
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+src/floppy.img
+src/stage1/stage1
+src/stage2/stage2
+src/mbkernel/kernel
+src/mbkernel/iso/boot/grub/kernel
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+
+
