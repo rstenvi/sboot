@@ -111,7 +111,7 @@ stage2:
 	; Read in the kernel
 	mov ax, KERNEL_LOW_SEG
 	mov es, ax
-	mov ax, 5		; Stage 1 + stage 2 (TODO: Remove hardcode)
+	mov ax, (STAGE2_SECTORS+1)
 	
 	mov bx, KERNEL_LOW_ADDR
 	mov cx, KERNEL_SECTORS
@@ -139,8 +139,20 @@ pmode:
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
-	mov esp, 0x9000	; TODO: Remove hardcode
-	
+	mov esp, 0x09FFF0	; TODO: Remove hardcode
+
+	; Initialize the screen so that printing can be done
+	call screen_init
+
+
+	; Uncomment below to test printing
+;	mov ebx, pmodemsg
+;	call screen_print
+;	mov eax, 16
+;	mov ebx, 16
+;	call screen_print_integer
+;	jmp $
+
 	; Check if the kernel is MB compliant
 	mov ebx, KERNEL_LOW_ADDR
 	call find_mb_kernel
@@ -157,7 +169,6 @@ pmode:
 	pop ebx		; Offset to MB header
 	pop esi		; Start of kernel
 
-	; Does NOT work, bad standard
 	call mb_move_executable
 	jc mb_failure
 
@@ -207,7 +218,9 @@ mb_failure:
 
 
 
+;pmodemsg db "In protected mode", 0x0a, 0x00
 %include "multiboot.s"
+%include "print_pmode.s"
 
 ALIGN 8
 stage2_end:
@@ -225,5 +238,5 @@ failure_a20:
 
 
 ; Not really needed, but it makes it easier to create the disk with dd
-times 1536 - ($-$$) db 0
+times (STAGE2_SECTORS*512) - ($-$$) db 0
 
