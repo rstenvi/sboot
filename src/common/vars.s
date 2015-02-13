@@ -70,7 +70,7 @@
 
 
 %ifndef STAGE2_SECTORS
-	%define STAGE2_SECTORS 5
+	%define STAGE2_SECTORS 6
 %endif
 
 

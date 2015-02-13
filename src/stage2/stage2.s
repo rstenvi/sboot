@@ -145,6 +145,57 @@ pmode:
 	call screen_init
 
 
+	; Commented code below tests the functionality implemented against the TPM
+;	call tis_init
+;	jc .notpm
+
+;	mov ebx, msg_succ_tpm_find
+;	call screen_print
+
+;	mov eax, 3
+;	call tis_get_access
+;	jc .tpmnoaccess
+
+;	mov eax, 16
+;	mov edi, tpmreadresp
+;	call TPM_PCRRead
+;	jc .pcrfail
+
+;	mov edi, tpmreadresp
+;	call print_hash_pcr
+
+;	mov eax, 16
+;	mov edi, tpmreadresp
+;	mov esi, testhash
+;	call TPM_Extend
+;	jc .extendfail
+
+;	mov edi, tpmreadresp
+;	call print_hash_pcr
+
+;	jmp .pause
+
+;.notpm:
+;	mov ebx, msg_fail_tpm_find
+;	call screen_print
+;	jmp .pause
+;.pcrfail:
+;	mov ebx, msg_fail_pcr_read
+;	call screen_print
+;	jmp .pause
+;.extendfail:
+;	mov ebx, msg_fail_pcr_extend
+;	call screen_print
+;	jmp .pause
+;.tpmnoaccess:
+;	mov ebx, msg_fail_tpm_access
+;	call screen_print
+;	jmp .pause
+
+;.pause:
+;	jmp $
+
+
 	; Uncomment below to test printing
 ;	mov ebx, pmodemsg
 ;	call screen_print
@@ -217,10 +268,15 @@ mb_failure:
 	hlt
 
 
+tpmreadresp: dd 0, 0, 0, 0, 0
 
 ;pmodemsg db "In protected mode", 0x0a, 0x00
 %include "multiboot.s"
 %include "print_pmode.s"
+%include "tis.s"
+%include "tpm.s"
+%include "misc.s"
+%include "strings.s"
 
 ALIGN 8
 stage2_end:
