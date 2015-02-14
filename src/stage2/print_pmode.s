@@ -70,6 +70,7 @@ screen_init:
 	; Clear the buffer used when converting integers to strings
 	call screen_clear_temp
 
+	call screen_remove_cursor
 	ret
 
 ; INPUT:
@@ -248,5 +249,30 @@ screen_print_integer:
 	call screen_clear_temp
 	ret
 
+
+; Remove the cursor by placing it outside the screen area
+screen_remove_cursor:
+	pusha
+	xor eax, eax
+	xor edx, edx
+
+	mov dx, 0x3D4
+	mov al, 14
+	out dx, al
+
+	mov dx, 0x3D5
+	mov al, 0xff
+	out dx, al
+
+	mov dx, 0x3D4
+	mov al, 15
+	out dx, al
+
+	mov dx, 0x3D5
+	mov al, 0xff
+	out dx, al
+
+	popa
+	ret
 
 %endif
