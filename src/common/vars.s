@@ -70,8 +70,11 @@
 
 
 %ifndef STAGE2_SECTORS
-	%define STAGE2_SECTORS 6
+	%define STAGE2_SECTORS 7
 %endif
 
+%ifndef SHA1_BIG_ENDIAN
+	%define SHA1_BIG_ENDIAN TRUE
+%endif
 
 %endif

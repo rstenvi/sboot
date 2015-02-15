@@ -144,6 +144,22 @@ pmode:
 	; Initialize the screen so that printing can be done
 	call screen_init
 
+	; Commented code below tests the SHA-1 hash function
+;	mov esi, sha1_context
+;	call sha1_init
+
+;	mov ecx, 20
+;	mov esi, sha1_context
+;	mov edi, testhash
+;	call sha1_update
+
+;	mov esi, sha1_context
+;	call sha1_complete
+
+;	mov edi, esi
+;	add edi, 8
+;	call print_hash_pcr
+;	jmp $
 
 	; Commented code below tests the functionality implemented against the TPM
 ;	call tis_init
@@ -270,12 +286,15 @@ mb_failure:
 
 tpmreadresp: dd 0, 0, 0, 0, 0
 
+;sha1_context: dd 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
 ;pmodemsg db "In protected mode", 0x0a, 0x00
 %include "multiboot.s"
 %include "print_pmode.s"
 %include "tis.s"
 %include "tpm.s"
 %include "misc.s"
+%include "sha1.s"
 %include "strings.s"
 
 ALIGN 8
