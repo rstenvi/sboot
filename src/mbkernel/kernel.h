@@ -8,6 +8,7 @@
 
 #include <stdint.h>	// uint32_t etc
 #include <stddef.h>	// size_t
+#include <stdbool.h>
 
 
 // Defined in ports.s

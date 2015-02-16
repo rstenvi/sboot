@@ -7,7 +7,7 @@
 %include "vars.s"
 
 ; Size of kernel
-%define KERNEL_SECTORS 20
+%define KERNEL_SECTORS 32
 
 
 ; There are some simple functional differences between MB1 and MB2 that are
