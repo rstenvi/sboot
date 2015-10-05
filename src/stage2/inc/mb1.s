@@ -18,6 +18,7 @@ mb_mod_addr:    dd 0
 mb_syms0:       dd 0
 mb_syms1:       dd 0
 mb_syms2:       dd 0
+mb_syms3:       dd 0
 mb_mmap_len:    dd 0
 mb_mmap_addr:   dd 0
 mb_drv_len:     dd 0

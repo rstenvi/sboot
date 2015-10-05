@@ -10,8 +10,8 @@ ASFLAGS=-Iinc/ -felf32
 
 CFLAGS=-nostdlib -ffreestanding -O2 -Wall -Wextra -m32
 
-CC=i586-elf-gcc
-LD=i586-elf-gcc
+CC=i686-elf-gcc
+LD=i686-elf-gcc
 
 
 LDFLAGS=-T linker.ld

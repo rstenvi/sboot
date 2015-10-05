@@ -27,8 +27,8 @@ jmp stage2
 
 ; Some messages
 msg db 0x0a, 0x0d, "STAGE 2", 0x00
-a20_fail db 0x0a, 0x0D, "Unable to enable A20 gate", 0x00
 mb_fail db 0x0a, 0x0D, "Multiboot failure", 0x00
+;memmap_fail db 0x0a, 0x0D, "Failed to get memory map", 0x00
 
 
 ; Only MB 1 is supported
@@ -47,6 +47,10 @@ mb_fail db 0x0a, 0x0D, "Multiboot failure", 0x00
 %include "memory.s"
 %include "read.s"
 
+a20_fail db 0x0a, 0x0D, "Unable to enable A20 gate", 0x00
+memmap_fail db 0x0a, 0x0D, "Failed to get memory map", 0x00
+PRINT_HALT a20_fail
+PRINT_HALT memmap_fail
 
 
 ; Real entry point
@@ -79,7 +83,8 @@ stage2:
 	; Enable A20 gate, if we fail, we cannot go any further
 	call enable_a20
 	cmp ax, 1
-	jnz failure_a20
+;	jnz failure_a20
+	jnz ferror_a20_fail
 
 
 	; Install the GDT
@@ -88,23 +93,48 @@ stage2:
 	; Get lower and higher memory and place that in the MB info structure
 	call get_low_memory
 	mov [mb_mem_lo], ax
+	jc ferror_memmap_fail
 
 	call get_high_memory
 	mov [mb_mem_hi], ax
+	jc ferror_memmap_fail
+
+	; Set the flag to say that we found lower and upper memory
+	mov eax, [mb_flags]
+	or eax, 1
+	mov [mb_flags], eax
+	jc ferror_memmap_fail
 
 
 	; Get the complete memory map from the kernel, we place it as the end of the
 	; stage 2.
-	mov di, stage2_end
+	mov di, stage2_end + 4
 	call get_memory_map
+	jc ferror_memmap_fail
 
-
+	xchg bx, bx
 	; Fill in more of the multiboot structure, where we can find the
 	; memory map.
 	mov WORD [mb_mmap_addr], stage2_end
-	mov ax, 24
+
+	; Set the size on each structure
+	mov cx, bp
+	mov bx, stage2_end
+	.setszstart:
+		mov DWORD [bx], 20
+		add bx, 24
+		dec cx
+		jnz .setszstart
+
+	; Set the size (mmap_len)
+	mov eax, 24
 	mul bp
-	mov [mb_mmap_len], bp
+	mov [mb_mmap_len], eax
+
+	; Set the flag
+	mov eax, [mb_flags]
+	or eax, (1<<6)
+	mov [mb_flags], eax
 
 
 
@@ -249,6 +279,7 @@ pmode:
 	add edi, 0x10		; Some buffer
 	push edi
 
+	; Copy entire MB structure to right location
 	mov esi, mb_start
 	mov ecx, mb_end
 	sub ecx, mb_start
@@ -303,14 +334,6 @@ stage2_end:
 
 ; 24 bytes (6 dwords) reserved for the memory map we get from BIOS.
 bios_mm_addr: dd 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
-
-failure_a20:
-	mov si, a20_fail
-	call print_string
-	cli
-	hlt
-
-
 
 ; Not really needed, but it makes it easier to create the disk with dd
 times (STAGE2_SECTORS*512) - ($-$$) db 0

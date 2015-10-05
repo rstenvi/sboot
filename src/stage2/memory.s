@@ -18,9 +18,11 @@ get_low_memory:
 
 	test ax, ax
 	jz .lowerror
+	clc
 	ret
 
 .lowerror:
+	stc
 	mov ax, 0
 	ret
 
@@ -30,6 +32,24 @@ get_low_memory:
 ; Output:
 ; - AX = KB of memory above 1MB
 get_high_memory:
+;	call get_high_memory_88
+;	jnc .success
+
+	call get_high_memory_e801
+	jnc .success
+
+	.failure:
+		stc
+		ret
+
+.success:
+	clc
+	ret
+
+
+
+get_high_memory_88:
+	clc
 	mov ax, 0x88
 	int 0x15
 	; Overflow flag is set if it failed
@@ -37,7 +57,7 @@ get_high_memory:
 
 	; Check if it's 0
 	test ax, ax
-	jz .hierror
+	je .hierror
 
 	; Unsupported function
 	cmp ah, 0x86
@@ -46,11 +66,67 @@ get_high_memory:
 	; Invalid command
 	cmp ah, 0x80
 	jz .hierror
+	clc
 	ret
 
 .hierror:
+	stc
 	mov ax, 0
 	ret
+
+
+
+get_high_memory_e801:
+	clc
+
+	xor eax, eax
+	xor ebx, ebx
+
+	; Zero it, so we know if BIOS uses those registers
+	xor cx, cx
+	xor dx, dx
+	mov ax, 0xE801
+	int 0x15
+
+	; Carry is set on failure
+	jc .hierror
+
+
+	; Unsupported function
+	cmp ah, 0x86
+	je .hierror
+
+	; Invalid command
+	cmp ah, 0x80
+	je .hierror
+
+	; Result is either in AX&BX or CX&DX
+	; If CX != 0, then it is on CX&DX
+	test cx, cx
+	jne .done
+
+	; We move it to CX&DX
+	mov cx, ax
+	mov dx, bx
+
+.done:
+	; Result is in CX&DX
+
+	; TODO: The math here might be a bit wrong, should it count the 15MB hole
+	; between the two returned values
+
+	; Get number in KB in AX
+	mov bx, 64
+	mov ax, dx
+	mul bx
+	add eax, ecx	; Add below 16MB
+	ret
+
+.hierror:
+	stc
+	mov eax, 0
+	ret
+
 
 
 
@@ -140,12 +216,14 @@ get_memory_map:
 .skipentry:
 	test ebx, ebx
 	jne .next
+	jmp .done
 
 .failed:
 	stc
 	ret
 
 .done:
+	clc
 	ret
 
 

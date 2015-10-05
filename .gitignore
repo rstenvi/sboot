@@ -11,5 +11,6 @@ src/stage2/stage2
 src/mbkernel/kernel
 src/mbkernel/iso/boot/grub/kernel
 
-
+src/mbkernel/image.iso
+src/mbkernel/iso/boot/kernel
 

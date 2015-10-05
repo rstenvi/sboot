@@ -28,6 +28,16 @@ print_string:
 .done:
 	ret
 
+
+%macro PRINT_HALT 1
+	ferror_%1:
+		mov si, %1
+		call print_string
+		cli
+		hlt
+%endmacro
+
+
 %endif	; MINIMIZE
 
 %endif
